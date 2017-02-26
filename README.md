@@ -1,5 +1,5 @@
-## codeBase
+# codeBase
 
-# Description
+## Description
 
-*codeBase* is the best CS 275 project to ever be conceived, *_ever_*.
+**codeBase** is the best CS 275 project to ever be conceived, *ever*.
