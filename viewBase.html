@@ -1,47 +1,40 @@
 <html>
-<head>
+  <head>
 	<title>viewBase</title>
 	<style>
 		body {background-color: black;}
 		h1 {color: white; font-family: "Lucida Console", Monaco, monospace}
 	</style>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script type="text/javascript">
-		google.charts.load('current', {'packages': ['geomap']});
-		google.charts.setOnLoadCallback(drawMap);
-		
-		function drawMap(){
-			var data = google.visualization.arrayToDataTable([
-				['Country', 'Sentiment'],
-				['Brazil', 'Example']
-				
-			]);
-			
-			var options = {
-				/*
-				colorAxis: {colors: ['#ee0000', '#008b00']},
-				displayMode: 'regions',
-				datalessRegionColor: '#fffff0',
-				backgroundColor: 'black',
-				*/
-			};
-			
-			options['dataMode'] = 'regions';
-			var container = document.getElementById('map');
-			var geomap = new google.visualization.GeoMap(container);
-		geomap.draw(data, options);
-      };
-		
-	</script>
-</head>
-<body>
-	<h1 align="center">viewBase</h1>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['geochart']});
+      google.charts.setOnLoadCallback(drawRegionsMap);
 
-	<div id="map" style="width: 900px; height: 500px;"></div>
-<!-- id='hashtag' -->
+      function drawRegionsMap() {
+        var data = google.visualization.arrayToDataTable([
+          ['Country',   'Sentiment'],
+          ['Algeria', .04], ['Angola', .05], ['Benin', .6], ['Botswana', .8],
+        ]);
+
+        var options = {
+          colorAxis: {colors: ['#00853f', 'white', '#e31b23']},
+          backgroundColor: 'black',
+          datalessRegionColor: 'white',
+          defaultColor: 'white',
+        };
+
+        var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
+        chart.draw(data, options);
+      };
+    </script>
+  </head>
+  <body>
+	<center>
+	<h1>viewBase</h1>
+    <div id="geochart-colors" style="width: 700px; height: 433px;"></div>
 	<input type="text" id="hashtag"></input>
 	<button id="submit" onclick="sendInfo()">Submit</button>
 	<div id="top"></div>
-</body>
+	</center>
+ </body>
 </html>
