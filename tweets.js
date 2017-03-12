@@ -4,22 +4,19 @@ var request = require('request');
 
 
 
+// twitter key and secret
 var key = 'hBsfVt6He4rInmGJXGwTjxWUq';
 var secret = 'HsXGxH25JZLXfKRR6ISp6aApWJgIctnJDjeV4qyoUVwI5pJnnO';
 
 
 
+// base 64 encode a string
 function encodeBase64(str) {
 	return new Buffer(str).toString('base64');
 }
 
-function decodeBase64(str) {
-	return new Buffer(str, 'base64').toString('ascii');
-}
-
-
-
-function getAccessToken() {
+// get the bearer access token from Twitter
+function getBearerToken(callback) {
 	var auth = encodeBase64(key + ':' + secret);
 	var body = 'grant_type=client_credentials';
 	
@@ -37,20 +34,36 @@ function getAccessToken() {
 	request(options, function(err, res, body) {
 		if (err) {
 			console.error(err);
-			return False;
+			callback(True);
 			
 		} else if (res.statusCode != 200) {
 			console.error(res);
-			return False;
+			callback(True);
 			
 		} else if (body.token_type != 'bearer') {
 			console.error('Key received was not \'bearer\'');
-			return False;
+			callback(True);
 			
 		} else {
-			return body.access_token;
+			callback(False, body.access_token);
 		}
 	});
 }
 
-getAccessToken();
+function makeTestRquest(bearer) {
+	var host = 'https://api.twitter.com';
+	var path = '/1.1/search/tweets.json';
+	
+	var options = {
+		'method' : 'GET',
+		'uri' : host + path,
+		'headers' : {
+			'Authorization' : 'Bearer ' + bearer,
+			'Content-Type' : 'application/json;charset=UTF-8',
+		}
+	};
+	
+	request.get(options, function(err, res, body) {});
+}
+
+getBearerToken(makeTestRquest);
