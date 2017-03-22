@@ -12,8 +12,7 @@ app.use(express.static(__dirname + '/Public'));
 app.all('/run', function(req, res) {
 	tweets.search(req.query.term, function(err, obj) {
 		if (err) {
-			res.writeHead(400);
-			res.send('Error: Could not compete request');
+			res.status(400).send('Error: Could not compete request');
 		} else {
 			res.send(obj);
 		}

@@ -4,12 +4,13 @@ var request = require('request');
 
 
 
+
 // twitter key and secret
 var key = 'hBsfVt6He4rInmGJXGwTjxWUq';
 var secret = 'HsXGxH25JZLXfKRR6ISp6aApWJgIctnJDjeV4qyoUVwI5pJnnO';
 
 // twitter bearer
-var bearer;
+var bearer = '';
 var valid_bearer = false;
 var getting_new_bearer = false;
 
@@ -68,11 +69,7 @@ function getNewBearer() {
 			makeQueuedRequests();
 		}
 		
-		// if the bearer still isn't valid, try again
-		if (!valid_bearer) {
-			getNewBearer();
-		}
-		
+		getting_new_bearer = false;
 	});
 }
 
@@ -86,17 +83,18 @@ function enqueueRequest(term, callback) {
 }
 
 function makeQueuedRequests() {
-	while (request_queue.length !== 0) {
+	while (valid_bearer && request_queue.length !== 0) {
 		req = request_queue.pop();
-		makeRquest(req.term, req.callback);
+		makeRequest(req.term, req.callback);
 	}
 }
 
-function makeRquest(term, callback) {
+function makeRequest(term, callback) {
 	var host = 'https://api.twitter.com';
 	var path = '/1.1/search/tweets.json?';
 	var query = querystring.stringify({
 		'q' : term,
+		'lang' : 'en',
 		'result_type' : 'recent'
 	});
 	
@@ -110,29 +108,52 @@ function makeRquest(term, callback) {
 	};
 	
 	request.get(options, function(err, res, body) {
+		body = JSON.parse(body);
 		
-		// TODO: if the bearer is invalid:
-		// enqueueRequest(term, callback);
-		// getNewBearer();
-		
+		// request failed
 		if (err) {
 			console.error(err);
 			callback(true);
-			
-		} else if (res.statusCode !== 200) {
-			console.error('Status code was not 200');
-			console.error(res);
-			callback(true);
+			return;
+		}
+		
+		// success!
+		if (res.statusCode === 200) {
+			callback(false, body);
+			return;
+		}
+		
+		// collect error codes and messages
+		var error_codes = {};
+		if ('errors' in body) {
+			body.errors.forEach(function(err) {
+				error_codes[err.code.toString()] = err.message;
+			});
 			
 		} else {
-			callback(false, body);
+			console.err(body);
+			callback(true);
+			return;
+		}
+		
+		// authentication failed
+		if ('89' in error_codes) {
+			valid_bearer = false;
+			enqueueRequest(term, callback);
+			getNewBearer();
+			
+		// unknown error
+		} else {
+			console.error('Error: Status code ' + res.statusCode);
+			console.error(error_codes);
+			callback(true);
 		}
 	});
 }
 
 function search(term, callback) {
 	if (valid_bearer) {
-		makeRquest(term, callback);
+		makeRequest(term, callback);
 		
 	} else {
 		enqueueRequest(term, callback);
