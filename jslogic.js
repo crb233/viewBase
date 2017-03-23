@@ -17,7 +17,7 @@ function sendHastag(){
 		success: function(msg){
 			var n = msg.length;
 			var list = "['Country', 'Sentiment'],";
-			for(int i = 0; i < n; i++){
+			for(var i = 0; i < n; i++){
 				list = list + "['" + msg[i].location + "'," + msg[i].sentiment + "],";
 			}
 			
@@ -45,7 +45,7 @@ function topTen(){
 		success: function(msg){
 			var topten = "<h2> Trending </h2><ul>";
 			var n = msg.length;
-			for(int i = 0; i < n; i++){
+			for(var i = 0; i < n; i++){
 				topten = topten + "<li>" + msg[i] + "</li>";
 			}
 			
