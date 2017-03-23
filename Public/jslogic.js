@@ -1,7 +1,7 @@
 function onLoad() {
 	topTen();
 	drawRegionsMap([['Country','Sentiment']]);
-	
+
 	$('#hashtag').keypress(function(event) {
 		if (event.which == 13) {
 			$('#submit').click();
@@ -11,18 +11,13 @@ function onLoad() {
 
 function sendHashtag() {
 	var hashtag = document.getElementById("hashtag").value;
-	
-	var params = {
-		"hashtag" : hashtag
-	};
-	
+
 	var URL = "http://viewbase.azurewebsites.net/getSentimentMap?hashtag=" + hashtag;
-	
+
 	$.ajax({
-		type : "POST",
+		type : "GET",
 		url : URL,
 		contentType: "application/json; charset=utf-8",
-		data: params,
 		dataType: "json",
 		success: function(json){
 			var n = json.length;
@@ -31,22 +26,22 @@ function sendHashtag() {
 				list = list + "['" + json[i].location + "'," + json[i].sentiment + "],";
 				console.log(json[i].location);
 			}
-			
+
 			list = "[" + list + "]";
 			drawRegionsMap(list);
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
 			document.getElementById("map-error").innerHTML = "Error fetching " + URL;
 		}
-		
+
 	});
 }
 
 function topTen(){
 	var displayTopTen = document.getElementById("top");
-	
+
 	var URL = "http://viewbase.azurewebsites.net/getTopHashtags";
-	
+
 	$.ajax({
 		type: "GET",
 		url: URL,
@@ -59,7 +54,7 @@ function topTen(){
 				topten += "<li>" + msg[i] + "</li>";
 			}
 			topten += "</ul>";
-			
+
 			document.getElementById("top").innerHTML = topten;
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
@@ -73,14 +68,14 @@ google.charts.setOnLoadCallback(drawRegionsMap);
 
 function drawRegionsMap(data) {
 	dataMap = google.visualization.arrayToDataTable(data);
-	
+
 	var options = {
 	  colorAxis: {colors: ['#00853f', 'white', '#e31b23']},
 	  backgroundColor: 'black',
 	  datalessRegionColor: 'white',
 	  defaultColor: 'white',
 	};
-	
+
 	var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
 	chart.draw(dataMap, options);
 }
