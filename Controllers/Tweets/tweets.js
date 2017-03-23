@@ -317,12 +317,14 @@ function search(search_query, callback) {
 
 // Gets tweets pertaining to a particular hashtag, with location data
 Tweets.prototype.getTweets = function(hashtag) {
+	self = this;
 	search('#' + hashtag, function(err, res) {
 		if (err) {
+			console.log(err);
 			res = [];
 		}
 
-		this.emit('tweetsResponse', res);
+		self.emit('tweetsResponse', res);
 	});
 };
 
