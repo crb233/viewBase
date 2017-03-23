@@ -18,12 +18,12 @@ function sendHashtag() {
 		contentType: "application/json; charset=utf-8",
 		data: params,
 		dataType: "json",
-		success: function(msg){
-			var n = msg.length;
+		success: function(json){
+			var n = json.length;
 			var list = "['Country', 'Sentiment'],";
 			for(var i = 0; i < n; i++){
-				list = list + "['" + msg[i].location + "'," + msg[i].sentiment + "],";
-				console.log(msg[i].location);
+				list = list + "['" + json[i].location + "'," + json[i].sentiment + "],";
+				console.log(json[i].location);
 			}
 			
 			list = "[" + list + "]";
