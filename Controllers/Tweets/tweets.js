@@ -323,8 +323,8 @@ Tweets.prototype.getTweets = function(hashtag) {
 			console.log(err);
 			res = [];
 		}
-
-		self.emit('tweetsResponse', res);
+		console.log(res.tweets);
+		self.emit('tweetsResponse', res.tweets);
 	});
 };
 
