@@ -12,15 +12,35 @@ app.listen(port,function(){
 
 var TweetController = require("./Controllers/Tweets/tweets");
 var tc = new TweetController();
-var SentimentController = require("./Controllers/Sentiment/Sentiment");
+var SentimentController = require("./Controllers/Sentiment/sentiment");
 var sc = new SentimentController();
+var DatabaseController = require("./Controllers/Database/database");
+var db = new DatabaseController();
 
 app.get("/getSentimentMap", function(req,res){
-  tc.once("tweetsResponse", function(tweets){
-    sc.getTweetSentiments(tweets);
-  });
-  sc.once("sentimentResponse", function(result){
-    res.status(200).send(result);
-  });
-  tc.getTweets(req.query.hashtag);
+	hashtag = req.query.hashtag;
+	db.once("cacheResponse", function(response){
+		if(response != null){
+			db.incrementNumSearches(hashtag);
+			res.status(200).send(response);
+		}else{
+			tc.once("tweetsResponse", function(tweets){
+		    sc.getTweetSentiments(tweets);
+		  });
+		  sc.once("sentimentResponse", function(result){
+				db.storeResult(hashtag, JSON.stringify(result));
+		    res.status(200).send(result);
+		  });
+		  tc.getTweets(hashtag);
+		}
+	});
+	db.getCachedResult(hashtag);
+});
+
+app.get("/getTopHashtags", function(req,res){
+	res.send(process.env.MYSQLCONNSTR_localdb)
+	db.once("topSearchResponse", function(response){
+		res.status(200).send(response);
+	});
+	db.topSearches();
 });
