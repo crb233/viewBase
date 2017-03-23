@@ -1,4 +1,4 @@
-function sendHastag(){
+function sendHashtag(){
 	
 	var hashtag = document.getElementById("hashtag").value;
 	
