@@ -7,6 +7,8 @@ function Database(){
 utils.inherits(Database, EventEmitter);
 module.exports = Database;
 
+HR_TO_MS = 3600000
+
 var mysql = require('mysql');
 var connString = process.env.MYSQLCONNSTR_localdb || "d=viewBase;d=localhost:3306;u=viewbase;p=viewbase"
 
@@ -53,14 +55,18 @@ Database.prototype.topSearches = function() {
 }
 
 Database.prototype.getCachedResult = function(hashtag){
-	var query = "SELECT jsonData FROM db WHERE hashtag = '" + hashtag + "';";
+	var query = "SELECT jsonData, lastCalculated FROM db WHERE hashtag = '" + hashtag + "';";
 	self = this;
 	con.query(query, function(err,rows,fields) {
 		if(rows.length == 0)	{
 			self.emit("cacheResponse", null);
 		}
 		else {
-			self.emit("cacheResponse", rows[0].jsonData);
+			if(Date.now() - Date.parse(rows[0].lastCalculated) > HR_TO_MS){
+				self.emit("cacheResponse", null);
+			}else{
+				self.emit("cacheResponse", rows[0].jsonData);
+			}
 		}
 	});
 }
