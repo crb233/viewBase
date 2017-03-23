@@ -68,7 +68,7 @@ function drawRegionsMap(data) {
 	dataMap = google.visualization.arrayToDataTable(data);
 
 	var options = {
-	  colorAxis: {colors: ['#00853f', 'white', '#e31b23']},
+	  colorAxis: {colors: ['#e31b23', 'white', '#00853f']},
 	  backgroundColor: 'black',
 	  datalessRegionColor: 'white',
 	  defaultColor: 'white',
