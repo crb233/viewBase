@@ -1,5 +1,9 @@
-function sendHashtag(){
-	
+function onLoad() {
+	topTen();
+	drawRegionsMap([['Country','Sentiment']]);
+}
+
+function sendHashtag() {
 	var hashtag = document.getElementById("hashtag").value;
 	
 	var params = {
@@ -10,7 +14,7 @@ function sendHashtag(){
 	
 	$.ajax({
 		type : "POST",
-		url : URL, 
+		url : URL,
 		contentType: "application/json; charset=utf-8",
 		data: params,
 		dataType: "json",
@@ -52,7 +56,7 @@ function topTen(){
 			
 			topten = topten + "</ul>";
 			
-			document.getElementById("top").innerHTML = topten; 
+			document.getElementById("top").innerHTML = topten;
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
 			document.getElementById("top").innerHTML = "Error fetching " + URL;
@@ -64,15 +68,15 @@ google.charts.load('current', {'packages':['geochart']});
 google.charts.setOnLoadCallback(drawRegionsMap);
 
 function drawRegionsMap(data) {
-	var data = google.visualization.arrayToDataTable(data);
-
+	data = google.visualization.arrayToDataTable(data);
+	
 	var options = {
 	  colorAxis: {colors: ['#00853f', 'white', '#e31b23']},
 	  backgroundColor: 'black',
 	  datalessRegionColor: 'white',
 	  defaultColor: 'white',
 	};
-
+	
 	var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
 	chart.draw(data, options);
-};
+}
