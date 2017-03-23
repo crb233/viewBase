@@ -39,7 +39,7 @@ function sendHashtag() {
 function topTen(){
 	var displayTopTen = document.getElementById("top");
 	
-	var URL = "http://viewbase.azurewebsites.net/top" ;
+	var URL = "http://viewbase.azurewebsites.net/getTopHashtags" ;
 	
 	$.ajax({
 		type: "GET",
