@@ -9,6 +9,9 @@ var request = require('request');
 var key = 'hBsfVt6He4rInmGJXGwTjxWUq';
 var secret = 'HsXGxH25JZLXfKRR6ISp6aApWJgIctnJDjeV4qyoUVwI5pJnnO';
 
+// google api key
+var google_key = 'AIzaSyAPwEXWcak3RmVsjzsRuCqkATVLiKPjj6s';
+
 // twitter bearer
 var bearer = '';
 var valid_bearer = false;
@@ -54,7 +57,7 @@ function getNewBearer() {
 		// request returned an error code
 		} else if (res.statusCode !== 200) {
 			console.error('Status code was not 200');
-			console.error(res);
+			console.error(body);
 			
 		// request returned the wrong token
 		} else if (body.token_type !== 'bearer') {
@@ -75,9 +78,9 @@ function getNewBearer() {
 
 
 
-function enqueueRequest(term, callback) {
+function enqueueRequest(search_query, callback) {
 	request_queue.push({
-		'term' : term,
+		'search_query' : search_query,
 		'callback' : callback
 	});
 }
@@ -85,16 +88,16 @@ function enqueueRequest(term, callback) {
 function makeQueuedRequests() {
 	while (valid_bearer && request_queue.length !== 0) {
 		req = request_queue.pop();
-		makeRequest(req.term, req.callback);
+		makeTwitterRequest(req.search_query, req.callback);
 	}
 }
 
-function makeRequest(term, callback) {
+function makeTwitterRequest(search_query, callback) {
 	var host = 'https://api.twitter.com';
 	var path = '/1.1/search/tweets.json?';
 	var query = querystring.stringify({
-		'q' : term,
-		'lang' : 'en',
+		'q' : search_query,
+		'count' : 10,
 		'result_type' : 'recent'
 	});
 	
@@ -103,7 +106,7 @@ function makeRequest(term, callback) {
 		'uri' : host + path + query,
 		'headers' : {
 			'Authorization' : 'Bearer ' + bearer,
-			'Content-Type' : 'application/json;charset=UTF-8',
+			'Content-Type' : 'application/json;charset=UTF-8'
 		}
 	};
 	
@@ -139,27 +142,175 @@ function makeRequest(term, callback) {
 		// authentication failed
 		if ('89' in error_codes) {
 			valid_bearer = false;
-			enqueueRequest(term, callback);
+			enqueueRequest(search_query, callback);
 			getNewBearer();
 			
 		// unknown error
 		} else {
-			console.error('Error: Status code ' + res.statusCode);
 			console.error(error_codes);
 			callback(true);
 		}
 	});
 }
 
-function search(term, callback) {
-	if (valid_bearer) {
-		makeRequest(term, callback);
+function countryFromCooordinates(coords, callback) {
+	countryFromDescription(coords[0] + ' ' + coords[1], callback);
+}
+
+function searchGoogle(text, callback) {
+	var host = 'https://maps.googleapis.com';
+	var path = '/maps/api/place/textsearch/json?';
+	var query = querystring.stringify({
+		'key' : google_key,
+		'query' : text
+	});
+	
+	var options = {
+		'method' : 'GET',
+		'uri' : host + path + query,
+		'headers' : {
+			'Content-Type' : 'application/json;charset=UTF-8'
+		}
+	};
+	
+	request.get(options, function(err, res, body) {
+		body = JSON.parse(body);
+		
+		// request failed
+		if (err) {
+			console.error(err);
+			callback(true);
+			
+		// request returned a failure code
+		} else if (res.statusCode !== 200) {
+			console.error(body);
+			callback(true);
+			
+		// no results
+		} else if (body.status !== 'OK') {
+			callback(true);
+			
+		// success!
+		} else {
+			var loc = body.results[0].geometry.location;
+			countryFromDescription(loc.lat + ' ' + loc.lng, callback);
+		}
+	});
+}
+
+function countryFromDescription(text, callback) {
+	var host = 'https://www.meteoblue.com';
+	var path = '/en/server/search/query3?';
+	var query = querystring.stringify({
+		'query' : text
+	});
+	
+	var options = {
+		'method' : 'GET',
+		'uri' : host + path + query,
+		'headers' : {
+			'Content-Type' : 'application/json;charset=UTF-8'
+		}
+	};
+	
+	request.get(options, function(err, res, body) {
+		body = JSON.parse(body);
+		
+		// request failed
+		if (err) {
+			console.error(err);
+			callback(true);
+			
+		// request returned a failure code
+		} else if (res.statusCode !== 200) {
+			console.error(body);
+			callback(true);
+			
+		// no results
+		} else if (body.results.length === 0) {
+			callback(true);
+			
+		// success!
+		} else {
+			callback(false, body.results[0].iso2);
+		}
+	});
+}
+
+function getLocation(tweet, callback) {
+	if (tweet.place !== null && tweet.place.country_code !== null) {
+		callback(false, tweet.place.country_code);
+		
+	} else if (tweet.coordinates !== null) {
+		countryFromCooordinates(tweet.coordinates, callback);
+		
+	} else if (tweet.user.location !== '') {
+		countryFromDescription(tweet.user.location, function(err, data) {
+			if (err) {
+				searchGoogle(tweet.user.location, callback);
+				
+			} else {
+				callback(false, data);
+			}
+		});
 		
 	} else {
-		enqueueRequest(term, callback);
+		callback(false, '');
+	}
+}
+
+function reduceTweet(tweet, callback) {
+	getLocation(tweet, function(err, country) {
+		if (err) {
+			callback(true);
+			
+		} else {
+			callback(false, {
+				'id' : tweet.id_str,
+				'text' : tweet.text,
+				'country' : country,
+				'datetime' : tweet.created_at
+			});
+		}
+	});
+}
+
+function search(search_query, callback) {
+	if (valid_bearer) {
+		makeTwitterRequest(search_query, function(err, data) {
+			if (err) {
+				callback(true);
+				return;
+			}
+			
+			var i = data.statuses.length;
+			var tweets = [];
+			
+			data.statuses.forEach(function(t) {
+				reduceTweet(t, function(err, tweet) {
+					i -= 1;
+					
+					if (!err) {
+						tweets.push(tweet);
+					}
+					
+					if (i === 0) {
+						callback(false, {
+							'tweets' : tweets,
+							'query' : data.search_metadata.query
+						});
+					}
+				});
+			});
+			
+		});
+		
+	} else {
+		enqueueRequest(search_query, callback);
 		getNewBearer();
 	}
 }
+
 
 
 

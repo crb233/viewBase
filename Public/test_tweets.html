@@ -9,7 +9,7 @@
 				padding: 16px;
 				font-family: 'Tahoma', Geneva, sans-serif;
 			}
-			#refresh {
+			#search_query {
 				border-width: 1.5px;
 				border-radius: 4px;
 				border-color: #ddd;
@@ -17,7 +17,15 @@
 				font-size: 16px;
 				padding: 12px;
 			}
-			#refresh:hover {
+			#search {
+				border-width: 1.5px;
+				border-radius: 4px;
+				border-color: #ddd;
+				background-color: #fff;
+				font-size: 16px;
+				padding: 12px;
+			}
+			#search:hover {
 				cursor: pointer;
 				background-color: #fbfbfb;
 			}
@@ -90,7 +98,7 @@
 					
 				// string
 				} else if (typeof obj === 'number') {
-					return '' + obj;
+					return obj.toString();
 					
 				// string
 				} else if (typeof obj === 'string' || obj instanceof String) {
@@ -116,7 +124,7 @@
 					return strings.join('');
 					
 				// empty object
-				} else if (obj === {}) {
+			} else if ($.isEmptyObject(obj)) {
 					return '{}';
 					
 				// non-empty object
@@ -158,10 +166,13 @@
 			function get_data() {
 				$('#loader').show();
 				
+				var number = 5;
+				var search_query = $('#search_query').val() || 'kangaroo';
+				
 				function success(data) {
 					$('#loader').hide();
 					$('#error').html('');
-					$('#response').html(fold_obj(JSON.parse(data)));
+					$('#response').html(fold_obj(data));
 					setup_folds();
 				}
 				
@@ -175,9 +186,9 @@
 					url : './run',
 					contentType : 'application/json; charset=utf-8',
 					data : {
-						'term' : 'kangaroo'
+						'search_query' : search_query
 					},
-					dataType : 'html',
+					dataType : 'json',
 					success : success,
 					error : error
 				});
@@ -191,7 +202,8 @@
 	</head>
 	<body>
 		
-		<button id='refresh' onclick="get_data()"> Refresh </button>
+		<input id='search_query' type='text' placeholder='Search for "kangaroo"'/>
+		<button id='search' onclick="get_data()"> Search </button>
 		<div id='loader'></div>
 		<div id='error'></div>
 		<div id='response'></div>
