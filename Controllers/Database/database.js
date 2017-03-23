@@ -8,7 +8,7 @@ utils.inherits(Database, EventEmitter);
 module.exports = Database;
 
 var mysql = require('mysql');
-var connString = process.env.MYSQLCONNSTR_localdb || "d=viewBase;d=localhost;u=viewbase;p=viewbase"
+var connString = process.env.MYSQLCONNSTR_localdb || "d=viewBase;d=localhost:3306;u=viewbase;p=viewbase"
 
 connString = connString.split(";");
 for( i=0; i < connString.length; i++){
@@ -16,7 +16,8 @@ for( i=0; i < connString.length; i++){
 }
 
 var con = mysql.createConnection({
-	host: connString[1],
+	host: connString[1].split(":")[0],
+	port: connString[1].split(":")[1],
 	user: connString[2],
 	password: connString[3],
 	database: connString[0]
