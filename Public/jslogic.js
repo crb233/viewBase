@@ -30,7 +30,7 @@ function sendHashtag() {
 			drawRegionsMap(list);
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
-			document.getElementById("geochart-colors").innerHTML = "Error fetching " + URL;
+			document.getElementById("map-error").innerHTML = "Error fetching " + URL;
 		}
 		
 	});
@@ -39,7 +39,7 @@ function sendHashtag() {
 function topTen(){
 	var displayTopTen = document.getElementById("top");
 	
-	var URL = "http://viewbase.azurewebsites.net/getTopHashtags" ;
+	var URL = "http://viewbase.azurewebsites.net/getTopHashtags";
 	
 	$.ajax({
 		type: "GET",
