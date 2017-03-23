@@ -6,7 +6,7 @@ function sendHashtag(){
 		"hashtag" : hashtag
 	};
 	
-	var URL = "http://viewbase.azurewebsites.net/hash?hashtag=" + hashtag;
+	var URL = "http://viewbase.azurewebsites.net/getSentimentMap?hashtag=" + hashtag;
 	
 	$.ajax({
 		type : "POST",
@@ -19,13 +19,14 @@ function sendHashtag(){
 			var list = "['Country', 'Sentiment'],";
 			for(var i = 0; i < n; i++){
 				list = list + "['" + msg[i].location + "'," + msg[i].sentiment + "],";
+				console.log(msg[i].location);
 			}
 			
 			list = "[" + list + "]";
 			drawRegionsMap(list);
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
-			document.getElementById("map").innerHTML = "Error fetching " + URL;
+			document.getElementById("geochart-colors").innerHTML = "Error fetching " + URL;
 		}
 		
 	});
@@ -34,7 +35,7 @@ function sendHashtag(){
 function topTen(){
 	var displayTopTen = document.getElementById("top");
 	
-	var URL = "http://viewbase.azurewebsites.net//top" 
+	var URL = "http://viewbase.azurewebsites.net/top" ;
 	
 	$.ajax({
 		type: "GET",
