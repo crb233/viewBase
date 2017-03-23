@@ -46,15 +46,13 @@ function topTen(){
 		url: URL,
 		contentType: "application/json; charset=utf-8",
 		data: {},
-		dataType: "jsonp",
-		success: function(msg){
+		dataType: "json",
+		success: function(msg) {
 			var topten = "<h2> Trending </h2><ul>";
-			var n = msg.length;
-			for(var i = 0; i < n; i++){
-				topten = topten + "<li>" + msg[i] + "</li>";
+			for (var i = 0; i < msg.length; i++) {
+				topten += "<li>" + msg[i] + "</li>";
 			}
-			
-			topten = topten + "</ul>";
+			topten += "</ul>";
 			
 			document.getElementById("top").innerHTML = topten;
 		},
