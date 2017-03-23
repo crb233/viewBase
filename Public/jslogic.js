@@ -21,7 +21,7 @@ function sendHashtag() {
 		dataType: "json",
 		success: function(json){
 			var n = json.length;
-			var list = [[{label: 'Country', type: 'string'}, {label: 'Sentiment', type: 'number'}]];
+			var list = [['Country', 'Sentiment']];
 			for(var i = 0; i < n; i++){
 				list.push([json[i].location, json[i].sentiment]);
 			}
