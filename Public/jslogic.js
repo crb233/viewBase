@@ -1,6 +1,12 @@
 function onLoad() {
 	topTen();
 	drawRegionsMap([['Country','Sentiment']]);
+	
+	$('#hashtag').keypress(function(event) {
+		if (event.which == 13) {
+			$('#submit').click();
+		}
+	});
 }
 
 function sendHashtag() {
