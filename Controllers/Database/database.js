@@ -8,17 +8,24 @@ utils.inherits(Database, EventEmitter);
 module.exports = Database;
 
 var mysql = require('mysql');
+var connString = process.env.MYSQLCONNSTR_localdb || "d=viewBase;d=localhost;u=viewbase;p=viewbase"
+
+connString = connString.split(";");
+for( i=0; i < connString.length; i++){
+	connString[i] = connString[i].split("=").pop();
+}
+
 var con = mysql.createConnection({
-	host: 'localhost',
-	user: 'viewbase',
-	password: 'viewbase',
-	database: 'viewBase'
+	host: connString[1],
+	user: connString[2],
+	password: connString[3],
+	database: connString[0]
 });
 
 //connect to mysql
 con.connect(function(err) {
 	if (err) {
-		console.log("Error connecting to database");
+		console.log("Error connecting to database" + err);
 	}
 	else {
 		console.log("Database successfully connected");
