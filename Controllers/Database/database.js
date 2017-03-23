@@ -29,7 +29,7 @@ con.connect(function(err) {
 	}
 	else {
 		console.log("Database successfully connected");
-		tablecreate_query = "CREATE TABLE IF NOT EXISTS db(hashtag VARCHAR(50) key, jsonData TEXT, numSearches INT DEFAULT 1, lastCalculated TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+		tablecreate_query = "CREATE TABLE IF NOT EXISTS db(hashtag VARCHAR(50), jsonData TEXT, numSearches INT DEFAULT 1, lastCalculated TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(hashtag));"
 		con.query(tablecreate_query);
 	}
 });
