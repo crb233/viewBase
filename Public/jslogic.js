@@ -25,8 +25,8 @@ function sendHashtag() {
 			for(var i = 0; i < n; i++){
 				list.push([json[i].location, json[i].sentiment]);
 			}
-
 			drawRegionsMap(list);
+			document.getElementById("map-error").innerHTML = "";
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
 			document.getElementById("map-error").innerHTML = "Error fetching " + URL;
