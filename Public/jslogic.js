@@ -1,3 +1,5 @@
+var querystring = require('querystring');
+
 function onLoad() {
 	topTen();
 	drawRegionsMap([['Country','Sentiment']]);
@@ -10,9 +12,10 @@ function onLoad() {
 }
 
 function sendHashtag() {
-	var hashtag = document.getElementById("hashtag").value;
-
-	var URL = "http://viewbase.azurewebsites.net/getSentimentMap?hashtag=" + hashtag;
+	var URL = "http://viewbase.azurewebsites.net/getSentimentMap?";
+	URL += querystring.stringify({
+		'hashtag' : $("#hashtag").val()
+	});
 
 	$.ajax({
 		type : "GET",
@@ -20,15 +23,14 @@ function sendHashtag() {
 		contentType: "application/json; charset=utf-8",
 		dataType: "json",
 		success: function(json){
-			var n = json.length;
 			var list = [[{label: 'Country', type: 'string'}, {label: 'Sentiment', type: 'number'}]];
-			for(var i = 0; i < n; i++){
+			for(var i = 0; i < json.length; i++){
 				list.push([json[i].location, json[i].sentiment]);
 			}
 			drawRegionsMap(list);
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
-			document.getElementById("map-error").innerHTML = "Error fetching " + URL;
+			document.getElementById("map-error").innerHTML = "Error fetching " + URL + '\n' + thrownError;
 		}
 
 	});
