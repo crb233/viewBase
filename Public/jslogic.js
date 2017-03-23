@@ -39,7 +39,7 @@ function sendHashtag() {
 function topTen(){
 	var displayTopTen = document.getElementById("top");
 	
-	var URL = "http://viewbase.azurewebsites.net/top" ;
+	var URL = "http://viewbase.azurewebsites.net/getTopHashtags" ;
 	
 	$.ajax({
 		type: "GET",
@@ -68,7 +68,7 @@ google.charts.load('current', {'packages':['geochart']});
 google.charts.setOnLoadCallback(drawRegionsMap);
 
 function drawRegionsMap(data) {
-	data = google.visualization.arrayToDataTable(data);
+	dataMap = google.visualization.arrayToDataTable(data);
 	
 	var options = {
 	  colorAxis: {colors: ['#00853f', 'white', '#e31b23']},
@@ -78,5 +78,5 @@ function drawRegionsMap(data) {
 	};
 	
 	var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
-	chart.draw(data, options);
+	chart.draw(dataMap, options);
 }
