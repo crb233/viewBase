@@ -62,44 +62,17 @@
 		
 	</style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['geochart']});
-      google.charts.setOnLoadCallback(drawRegionsMap);
-
-      function drawRegionsMap() {
-        var data = google.visualization.arrayToDataTable([
-          ['Country',   'Sentiment'],
-          ['Algeria', .04], ['Angola', .05], ['Benin', .6], ['Botswana', .8],
-        ]);
-
-        var options = {
-          colorAxis: {colors: ['#00853f', 'white', '#e31b23']},
-          backgroundColor: 'black',
-          datalessRegionColor: 'white',
-          defaultColor: 'white',
-        };
-
-        var chart = new google.visualization.GeoChart(document.getElementById('geochart-colors'));
-        chart.draw(data, options);
-      };
-    </script>
+	<script type="text/javascript" src=jslogic.js></script>
   </head>
   <body>
 	<div id="container">
 		<h1>viewBase</h1>
 		<div id="submission">
 			<input type="text" id="hashtag" placeholder="Search..."></input>
-			<button id="submit" onclick="sendInfo()">Submit</button>
+			<button id="submit" onclick="sendHastag()">Submit</button>
 		</div>
 		<div id="geochart-colors" style="width: 700px; height: 433px;"></div>
 		<div id="top">
-			<h2> Trending </h2>
-			<ul>
-				<li> Snakes </li>
-				<li> Kangaroos </li>
-				<li> Teleprompters </li>
-				<li> Burgers </li>
-			</ul>
 		</div>
 	</div>
  </body>
