@@ -1,5 +1,3 @@
-var querystring = require('querystring');
-
 function onLoad() {
 	topTen();
 	drawRegionsMap([['Country','Sentiment']]);
@@ -13,9 +11,7 @@ function onLoad() {
 
 function sendHashtag() {
 	var URL = "http://viewbase.azurewebsites.net/getSentimentMap?";
-	URL += querystring.stringify({
-		'hashtag' : $("#hashtag").val()
-	});
+	URL +=  $("#hashtag").val();
 
 	$.ajax({
 		type : "GET",
