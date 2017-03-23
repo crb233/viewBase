@@ -101,7 +101,7 @@ function makeTwitterRequest(search_query, callback) {
 	var path = '/1.1/search/tweets.json?';
 	var query = querystring.stringify({
 		'q' : search_query,
-		'count' : 10,
+		'count' : 450,
 		'result_type' : 'recent'
 	});
 
@@ -320,10 +320,8 @@ Tweets.prototype.getTweets = function(hashtag) {
 	self = this;
 	search('#' + hashtag, function(err, res) {
 		if (err) {
-			console.log(err);
 			res = [];
 		}
-		console.log(res.tweets);
 		self.emit('tweetsResponse', res.tweets);
 	});
 };
