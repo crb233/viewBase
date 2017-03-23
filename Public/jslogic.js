@@ -21,13 +21,11 @@ function sendHashtag() {
 		dataType: "json",
 		success: function(json){
 			var n = json.length;
-			var list = "['Country', 'Sentiment'],";
+			var list = [[{label: 'Country', type: 'string'}, {label: 'Sentiment', type: 'number'}]];
 			for(var i = 0; i < n; i++){
-				list = list + "['" + json[i].location + "'," + json[i].sentiment + "],";
-				console.log(json[i].location);
+				list.push([json[i].location, json[i].sentiment]);
 			}
 
-			list = "[" + list + "]";
 			drawRegionsMap(list);
 		},
 		error: function (xhr, ajaxOptions, thrownError) {
