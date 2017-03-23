@@ -1,16 +1,20 @@
-
+var utils = require('util');
+var EventEmitter = require('events').EventEmitter;
 var querystring = require('querystring');
 var request = require('request');
+var fs = require('fs');
+
+function Tweets(){
+	EventEmitter.call(this);
+}
+utils.inherits(Tweets, EventEmitter);
 
 
 
-
-// twitter key and secret
-var key = 'hBsfVt6He4rInmGJXGwTjxWUq';
-var secret = 'HsXGxH25JZLXfKRR6ISp6aApWJgIctnJDjeV4qyoUVwI5pJnnO';
-
-// google api key
-var google_key = 'AIzaSyAPwEXWcak3RmVsjzsRuCqkATVLiKPjj6s';
+// api keys
+var twitter_key = fs.readFileSync(__dirname + "/twitter_key.txt","utf8").toString().trim();
+var twitter_secret = fs.readFileSync(__dirname + "/twitter_secret.txt","utf8").toString().trim();
+var google_key = fs.readFileSync(__dirname + "/google_key.txt","utf8").toString().trim();
 
 // twitter bearer
 var bearer = '';
@@ -32,10 +36,10 @@ function getNewBearer() {
 	if (valid_bearer || getting_new_bearer)
 		return;
 	getting_new_bearer = true;
-	
-	var auth = encodeBase64(key + ':' + secret);
+
+	var auth = encodeBase64(twitter_key + ':' + twitter_secret);
 	var body = 'grant_type=client_credentials';
-	
+
 	var options = {
 		'method' : 'POST',
 		'uri' : 'https://api.twitter.com/oauth2/token',
@@ -46,24 +50,24 @@ function getNewBearer() {
 		},
 		'body' : body
 	};
-	
+
 	request(options, function(err, res, body) {
 		body = JSON.parse(body);
-		
+
 		// request failed
 		if (err) {
 			console.error(err);
-			
+
 		// request returned an error code
 		} else if (res.statusCode !== 200) {
 			console.error('Status code was not 200');
 			console.error(body);
-			
+
 		// request returned the wrong token
 		} else if (body.token_type !== 'bearer') {
 			console.error('Key received was not \'bearer\'');
 			console.error(body);
-			
+
 		// request succeeded
 		} else {
 			bearer = body.access_token;
@@ -71,7 +75,7 @@ function getNewBearer() {
 			getting_new_bearer = false;
 			makeQueuedRequests();
 		}
-		
+
 		getting_new_bearer = false;
 	});
 }
@@ -97,10 +101,10 @@ function makeTwitterRequest(search_query, callback) {
 	var path = '/1.1/search/tweets.json?';
 	var query = querystring.stringify({
 		'q' : search_query,
-		'count' : 10,
+		'count' : 450,
 		'result_type' : 'recent'
 	});
-	
+
 	var options = {
 		'method' : 'GET',
 		'uri' : host + path + query,
@@ -109,42 +113,42 @@ function makeTwitterRequest(search_query, callback) {
 			'Content-Type' : 'application/json;charset=UTF-8'
 		}
 	};
-	
+
 	request.get(options, function(err, res, body) {
 		body = JSON.parse(body);
-		
+
 		// request failed
 		if (err) {
 			console.error(err);
 			callback(true);
 			return;
 		}
-		
+
 		// success!
 		if (res.statusCode === 200) {
 			callback(false, body);
 			return;
 		}
-		
+
 		// collect error codes and messages
 		var error_codes = {};
 		if ('errors' in body) {
 			body.errors.forEach(function(err) {
 				error_codes[err.code.toString()] = err.message;
 			});
-			
+
 		} else {
 			console.err(body);
 			callback(true);
 			return;
 		}
-		
+
 		// authentication failed
 		if ('89' in error_codes) {
 			valid_bearer = false;
 			enqueueRequest(search_query, callback);
 			getNewBearer();
-			
+
 		// unknown error
 		} else {
 			console.error(error_codes);
@@ -164,7 +168,7 @@ function searchGoogle(text, callback) {
 		'key' : google_key,
 		'query' : text
 	});
-	
+
 	var options = {
 		'method' : 'GET',
 		'uri' : host + path + query,
@@ -172,24 +176,24 @@ function searchGoogle(text, callback) {
 			'Content-Type' : 'application/json;charset=UTF-8'
 		}
 	};
-	
+
 	request.get(options, function(err, res, body) {
 		body = JSON.parse(body);
-		
+
 		// request failed
 		if (err) {
 			console.error(err);
 			callback(true);
-			
+
 		// request returned a failure code
 		} else if (res.statusCode !== 200) {
 			console.error(body);
 			callback(true);
-			
+
 		// no results
 		} else if (body.status !== 'OK') {
 			callback(true);
-			
+
 		// success!
 		} else {
 			var loc = body.results[0].geometry.location;
@@ -204,7 +208,7 @@ function countryFromDescription(text, callback) {
 	var query = querystring.stringify({
 		'query' : text
 	});
-	
+
 	var options = {
 		'method' : 'GET',
 		'uri' : host + path + query,
@@ -212,24 +216,24 @@ function countryFromDescription(text, callback) {
 			'Content-Type' : 'application/json;charset=UTF-8'
 		}
 	};
-	
+
 	request.get(options, function(err, res, body) {
 		body = JSON.parse(body);
-		
+
 		// request failed
 		if (err) {
 			console.error(err);
 			callback(true);
-			
+
 		// request returned a failure code
 		} else if (res.statusCode !== 200) {
 			console.error(body);
 			callback(true);
-			
+
 		// no results
 		} else if (body.results.length === 0) {
 			callback(true);
-			
+
 		// success!
 		} else {
 			callback(false, body.results[0].iso2);
@@ -240,20 +244,20 @@ function countryFromDescription(text, callback) {
 function getLocation(tweet, callback) {
 	if (tweet.place !== null && tweet.place.country_code !== null) {
 		callback(false, tweet.place.country_code);
-		
+
 	} else if (tweet.coordinates !== null) {
 		countryFromCooordinates(tweet.coordinates, callback);
-		
+
 	} else if (tweet.user.location !== '') {
 		countryFromDescription(tweet.user.location, function(err, data) {
 			if (err) {
 				searchGoogle(tweet.user.location, callback);
-				
+
 			} else {
 				callback(false, data);
 			}
 		});
-		
+
 	} else {
 		callback(false, '');
 	}
@@ -263,13 +267,13 @@ function reduceTweet(tweet, callback) {
 	getLocation(tweet, function(err, country) {
 		if (err) {
 			callback(true);
-			
+
 		} else {
 			callback(false, {
-				'id' : tweet.id_str,
-				'text' : tweet.text,
-				'country' : country,
-				'datetime' : tweet.created_at
+				//'id' : tweet.id_str,
+				'tweet' : tweet.text,
+				'location' : country,
+				//'datetime' : tweet.created_at
 			});
 		}
 	});
@@ -282,18 +286,18 @@ function search(search_query, callback) {
 				callback(true);
 				return;
 			}
-			
+
 			var i = data.statuses.length;
 			var tweets = [];
-			
+
 			data.statuses.forEach(function(t) {
 				reduceTweet(t, function(err, tweet) {
 					i -= 1;
-					
+
 					if (!err) {
 						tweets.push(tweet);
 					}
-					
+
 					if (i === 0) {
 						callback(false, {
 							'tweets' : tweets,
@@ -302,17 +306,27 @@ function search(search_query, callback) {
 					}
 				});
 			});
-			
+
 		});
-		
+
 	} else {
 		enqueueRequest(search_query, callback);
 		getNewBearer();
 	}
 }
 
+// Gets tweets pertaining to a particular hashtag, with location data
+Tweets.prototype.getTweets = function(hashtag) {
+	self = this;
+	search('#' + hashtag, function(err, res) {
+		if (err) {
+			res = [];
+		}
+		self.emit('tweetsResponse', res.tweets);
+	});
+};
 
 
 
 getNewBearer();
-module.exports.search = search;
+module.exports = Tweets;

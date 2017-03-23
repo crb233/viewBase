@@ -4,7 +4,9 @@
   "description": "**viewBase** is the best CS 275 project to ever be conceived, *ever*.",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "node-fetch": "^1.6.3",
+    "request": "^2.81.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -10,7 +10,7 @@ app.use(express.static(__dirname + '/Public'));
 
 // run test endpoint
 app.all('/run', function(req, res) {
-	tweets.search(req.query.term, function(err, obj) {
+	tweets.search(req.query.search_query, function(err, obj) {
 		if (err) {
 			res.status(400).send('Error: Could not compete request');
 		} else {
